@@ -17,32 +17,32 @@
             React.useEffect(() => {
                 const url = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?q=technology&api-key=aWhHeGJftfrR5Cdp7ENQWuoyqwkBnwdK';
 
+                const isXL = (image) => image.subtype === "xlarge";
+
+                const parse = (results) => {
+                    if (!results || !results.response) return [];
+                    return results.response.docs
+                        .filter(article => article.multimedia.some(isXL))
+                        .map(article => ({
+                            id: article._id,
+                            title: article.headline.main || "Untitled",
+                            imageURL: "https://static01.nyt.com/" + article.multimedia.find(isXL).url,
+                            webURL: article.web_url || "#"
+                        }));
+                };
+
                 const fetchData = async () => {
                     try {
                         const response = await fetch(url);
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                         const data = await response.json();
                         console.log("Full API Response:", data);
 
-                        // Filter articles that have an "xlarge" image
-                        const filteredArticles = data.response.docs.map(article => {
-                            const largeImage = article.multimedia.find(img => img.subType === "xlarge");
-                            if (largeImage) {
-                                return {
-                                    title: article.headline.main,
-                                    imageUrl: "https://static01.nyt.com/" + largeImage.url,
-                                    originalUrl: article.web_url
-                                };
-                            }
-                            return null;
-                        }).filter(article => article !== null);
-
+                        const filteredArticles = parse(data);
                         console.log("Filtered Articles:", filteredArticles);
                         setArticles(filteredArticles);
                     } catch (error) {
-                        console.error('Error fetching data:', error);
+                        console.error("Error fetching data:", error);
                     }
                 };
 
@@ -53,10 +53,10 @@
                 <div>
                     <h1>Technology News</h1>
                     <ul>
-                        {articles.map((article, index) => (
-                            <li key={index}>
-                                <a href={article.originalUrl} target="_blank" rel="noopener noreferrer">
-                                    <img src={article.imageUrl} alt={article.title} style={{ maxWidth: "300px" }} />
+                        {articles.map(article => (
+                            <li key={article.id}>
+                                <a href={article.webURL} target="_blank" rel="noopener noreferrer">
+                                    <img src={article.imageURL} alt={article.title} style={{ maxWidth: "300px" }} />
                                     <p>{article.title}</p>
                                 </a>
                             </li>
