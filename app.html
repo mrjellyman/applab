@@ -22,6 +22,7 @@
                     try {
                         const response = await fetch(url);
                         const data = await response.json();
+                        console.log("Hello");
                         console.log(data); // This logs the entire response to the console
                         setArticles(data.response.docs); // Save the article data to state
                     } catch (error) {
