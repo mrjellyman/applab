@@ -6,7 +6,6 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
 
 <body>
@@ -25,29 +24,41 @@
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
                         const data = await response.json();
-                        console.log(data); // Log entire JSON response to console
-                        const articles = data.response.docs;
-                        console.log(articles); // Log the articles array to console
-                        setArticles(articles); // Save articles to state
+                        console.log("Full API Response:", data);
+
+                        // Filter articles that have an "xlarge" image
+                        const filteredArticles = data.response.docs.map(article => {
+                            const largeImage = article.multimedia.find(img => img.subType === "xlarge");
+                            if (largeImage) {
+                                return {
+                                    title: article.headline.main,
+                                    imageUrl: "https://static01.nyt.com/" + largeImage.url,
+                                    originalUrl: article.web_url
+                                };
+                            }
+                            return null;
+                        }).filter(article => article !== null);
+
+                        console.log("Filtered Articles:", filteredArticles);
+                        setArticles(filteredArticles);
                     } catch (error) {
                         console.error('Error fetching data:', error);
                     }
                 };
 
                 fetchData();
-            }, []); // Only run once when the component mounts
+            }, []);
 
             return (
                 <div>
-                    <h1>Articles from New York Times</h1>
+                    <h1>Technology News</h1>
                     <ul>
                         {articles.map((article, index) => (
                             <li key={index}>
-                                <a href={article.web_url} target="_blank" rel="noopener noreferrer">
-                                    {article.headline.main}
+                                <a href={article.originalUrl} target="_blank" rel="noopener noreferrer">
+                                    <img src={article.imageUrl} alt={article.title} style={{ maxWidth: "300px" }} />
+                                    <p>{article.title}</p>
                                 </a>
-                                <p>{article.abstract}</p>
-                                <img src={"https://static01.nyt.com/" + article.multimedia[0].url} alt={article.headline.main} />
                             </li>
                         ))}
                     </ul>
