@@ -21,10 +21,14 @@
                 const fetchData = async () => {
                     try {
                         const response = await fetch(url);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
                         const data = await response.json();
-                        console.log("Hello");
-                        console.log(data); // This logs the entire response to the console
-                        setArticles(data.response.docs); // Save the article data to state
+                        console.log(data); // Log entire JSON response to console
+                        const articles = data.response.docs;
+                        console.log(articles); // Log the articles array to console
+                        setArticles(articles); // Save articles to state
                     } catch (error) {
                         console.error('Error fetching data:', error);
                     }
@@ -38,7 +42,13 @@
                     <h1>Articles from New York Times</h1>
                     <ul>
                         {articles.map((article, index) => (
-                            <li key={index}>{article.headline.main}</li>
+                            <li key={index}>
+                                <a href={article.web_url} target="_blank" rel="noopener noreferrer">
+                                    {article.headline.main}
+                                </a>
+                                <p>{article.abstract}</p>
+                                <img src={"https://static01.nyt.com/" + article.multimedia[0].url} alt={article.headline.main} />
+                            </li>
                         ))}
                     </ul>
                 </div>
