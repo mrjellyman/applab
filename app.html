@@ -19,8 +19,8 @@
             const [articles, setArticles] = React.useState([]);
 
             React.useEffect(() => {
-                const url = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?q=GcgGHl4xGqaAhIzQ'
-                    + 'api-key=aWhHeGJftfrR5Cdp7ENQWuoyqwkBnwdK'; // replace query and your_key
+                const url = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?q=technology'
+                    + 'api-key=aWhHeGJftfrR5Cdp7ENQWuoyqwkBnwdK';
 
                 const fetchData = async () => {
                     const response = await fetch(url);
