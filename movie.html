@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>MovieGrid</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        .movie-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .movie {
+            width: 200px;
+            text-align: center;
+        }
+
+        .movie img {
+            width: 100%;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <script type="text/babel">
+        function MovieGrid() {
+            const [movies, setMovies] = React.useState([]);
+
+            React.useEffect(() => {
+                const API_KEY = '8ebc327cb790aee08578042369e58d22'; // Replace with your TMDB API Key
+                const url = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc`;
+
+                const fetchData = async () => {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    setMovies(parse(data));
+                };
+
+                fetchData();
+            }, []);
+
+            const parse = (results) => {
+                if (!results || !results.results) return [];
+                return results.results.map(movie => ({
+                    id: movie.id,
+                    title: movie.title,
+                    imageURL: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+                    overview: movie.overview
+                }));
+            };
+
+            return (
+                <div className='movie-grid'>
+                    {movies.map(movie => (
+                        <Movie movie={movie} key={movie.id} />
+                    ))}
+                </div>
+            );
+        }
+
+        function Movie({ movie }) {
+            return (
+                <div className='movie'>
+                    <img src={movie.imageURL} alt={movie.title} />
+                    <h3>{movie.title}</h3>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('container')).render(<MovieGrid />);
+    </script>
+</body>
+
+</html>
