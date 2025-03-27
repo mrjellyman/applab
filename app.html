@@ -12,9 +12,6 @@
 <body>
     <div id="container"></div>
     <script type="text/babel">
-        // import React, { useEffect, useState } from 'react';
-
-
         function ArticleGrids() {
             const [articles, setArticles] = React.useState([]);
 
@@ -22,51 +19,33 @@
                 const url = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?q=technology&api-key=aWhHeGJftfrR5Cdp7ENQWuoyqwkBnwdK';
 
                 const fetchData = async () => {
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    setArticles(parse(data));
+                    try {
+                        const response = await fetch(url);
+                        const data = await response.json();
+                        console.log(data); // This logs the entire response to the console
+                        setArticles(data.response.docs); // Save the article data to state
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                    }
                 };
 
                 fetchData();
-            }, []); // Empty dependency array: componentDidMount equivalent
+            }, []); // Only run once when the component mounts
 
-            const parse = (results) => {
-                if (!results || !results.response) return [];
-                const articles = results.response.docs;
-                return articles.filter(article => article.multimedia.find(isXL))
-                    .map(article => ({
-                        id: article._id,
-                        title: article.headline.main || 'Untitled',
-                        imageURL: article.multimedia.find(isXL).url || '#',
-                        webURL: article.web_url || '#'
-                    }));
-            };
-
-            const isXL = (image) => image.subtype === 'xlarge';
-
-            return articles && ( // Conditional rendering
-                <div className='articles'>
-                    {articles.map(article => (
-                        <Article article={article} key={article.id} />
-                    ))}
-                </div>
-            );
-        }
-
-        // Article component remains unchanged
-        const Article = ({ article }) => {
-            var imgURL = 'https://static01.nyt.com/' + article.imageURL;
             return (
-                <div className='article'>
-                    <a className='article-link' href={article.webURL}>
-                        <img className='article-image' title={article.title} src={imgURL} />
-                    </a>
+                <div>
+                    <h1>Articles from New York Times</h1>
+                    <ul>
+                        {articles.map((article, index) => (
+                            <li key={index}>{article.headline.main}</li>
+                        ))}
+                    </ul>
                 </div>
             );
         }
 
         ReactDOM.createRoot(document.getElementById('container')).render(<ArticleGrids />);
-
     </script>
 </body>
-<html>
+
+</html>
